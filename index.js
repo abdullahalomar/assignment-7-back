@@ -25,9 +25,10 @@ async function run() {
     await client.connect();
     console.log("Connected to MongoDB");
 
-    const db = client.db("clothex");
+    const db = client.db("assignment7");
     const collection = db.collection("users");
     const clothCollection = db.collection("cloths");
+    const testimonialCollection = db.collection("testimonials");
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
@@ -247,6 +248,49 @@ async function run() {
         res.status(500).json({
           success: false,
           message: "Error updating cloth",
+        });
+      }
+    });
+
+    // Add Testimonial
+    app.post("/api/v1/create-testimonial", async (req, res) => {
+      const { name, location, contributionDate, description } = req.body;
+      console.log(req.body);
+      try {
+        const result = await testimonialCollection.insertOne({
+          name,
+          location,
+          contributionDate,
+          description,
+        });
+        console.log(result);
+
+        res.status(201).json({
+          success: true,
+          message: "testimonial added successfully",
+        });
+      } catch (error) {
+        console.error("Error adding testimonial:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error adding testimonial",
+        });
+      }
+    });
+
+    // Get all Testimonials
+    app.get("/api/v1/testimonials", async (req, res) => {
+      try {
+        const testimonials = await testimonialCollection.find({}).toArray();
+        res.json({
+          success: true,
+          data: testimonials,
+        });
+      } catch (error) {
+        console.error("Error fetching testimonials:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching testimonials",
         });
       }
     });
