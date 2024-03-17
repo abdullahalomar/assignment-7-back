@@ -29,6 +29,7 @@ async function run() {
     const collection = db.collection("users");
     const clothCollection = db.collection("cloths");
     const testimonialCollection = db.collection("testimonials");
+    const commentCollection = db.collection("comments");
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
@@ -376,6 +377,47 @@ async function run() {
         new: true,
       });
       res.send(result);
+    });
+
+    // Comment Post Operation
+    app.post("/api/v1/create-comment", async (req, res) => {
+      const { description } = req.body;
+      console.log(req.body);
+      try {
+        // Insert cloth into the cloth collection
+        const result = await commentCollection.insertOne({
+          description,
+        });
+        console.log(result);
+
+        res.status(201).json({
+          success: true,
+          message: "Comment added successfully",
+        });
+      } catch (error) {
+        console.error("Error adding Comment:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error adding Comment",
+        });
+      }
+    });
+
+    // Get all Comments
+    app.get("/api/v1/comments", async (req, res) => {
+      try {
+        const comments = await commentCollection.find({}).toArray();
+        res.json({
+          success: true,
+          data: comments,
+        });
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching comments",
+        });
+      }
     });
 
     // ==============================================================
