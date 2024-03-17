@@ -216,7 +216,7 @@ async function run() {
     // Cloth Update Operation
     app.put("/api/v1/winter-clothes/:id", async (req, res) => {
       const clothId = req.params.id;
-      const { title, description, image, category, size } = req.body; // Get updated cloth data from the request body
+      const { title, description, image, category, size } = req.body;
 
       try {
         const filter = { _id: new ObjectId(clothId) };
@@ -254,10 +254,11 @@ async function run() {
 
     // Add Testimonial
     app.post("/api/v1/create-testimonial", async (req, res) => {
-      const { name, location, contributionDate, description } = req.body;
+      const { image, name, location, contributionDate, description } = req.body;
       console.log(req.body);
       try {
         const result = await testimonialCollection.insertOne({
+          image,
           name,
           location,
           contributionDate,
@@ -293,6 +294,88 @@ async function run() {
           message: "Error fetching testimonials",
         });
       }
+    });
+
+    // Get a single testimonial item
+    app.get("/api/v1/testimonials/:id", async (req, res) => {
+      const testimonialId = req.params.id;
+
+      try {
+        const testimonial = await testimonialCollection.findOne({
+          _id: new ObjectId(testimonialId),
+        });
+
+        if (testimonial) {
+          res.json({
+            success: true,
+            data: testimonial,
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "Testimonial not found",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching testimonial:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching testimonial",
+        });
+      }
+    });
+
+    // Testimonial Update Operation
+    app.put("/api/v1/testimonials/:id", async (req, res) => {
+      const testimonialId = req.params.id;
+      const { image, name, location, contributionDate, description } = req.body;
+
+      try {
+        const filter = { _id: new ObjectId(testimonialId) };
+        const updateDoc = {
+          image,
+          name,
+          location,
+          contributionDate,
+          description,
+        };
+
+        const result = await testimonialCollection.replaceOne(
+          filter,
+          updateDoc,
+          {
+            new: true,
+          }
+        );
+
+        if (result.modifiedCount === 1) {
+          res.json({
+            success: true,
+            message: "Testimonial updated successfully",
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "Testimonial not found",
+          });
+        }
+      } catch (error) {
+        console.error("Error updating Testimonial:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error updating Testimonial",
+        });
+      }
+    });
+
+    // Delete Testimonials
+    app.delete("/api/v1/testimonials/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await testimonialCollection.deleteOne(query, {
+        new: true,
+      });
+      res.send(result);
     });
 
     // ==============================================================
