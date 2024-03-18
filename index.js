@@ -30,6 +30,7 @@ async function run() {
     const clothCollection = db.collection("cloths");
     const testimonialCollection = db.collection("testimonials");
     const commentCollection = db.collection("comments");
+    const volunteerCollection = db.collection("volunteer");
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
@@ -384,7 +385,6 @@ async function run() {
       const { name, description } = req.body;
       console.log(req.body);
       try {
-        // Insert cloth into the cloth collection
         const result = await commentCollection.insertOne({
           name,
           description,
@@ -493,6 +493,49 @@ async function run() {
         new: true,
       });
       res.send(result);
+    });
+
+    // add volunteer
+    app.post("/api/v1/create-volunteer", async (req, res) => {
+      const { name, email, phone, location } = req.body;
+      console.log(req.body);
+      try {
+        const result = await volunteerCollection.insertOne({
+          name,
+          email,
+          phone,
+          location,
+        });
+        console.log(result);
+
+        res.status(201).json({
+          success: true,
+          message: "volunteer added successfully",
+        });
+      } catch (error) {
+        console.error("Error adding volunteer:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error adding volunteer",
+        });
+      }
+    });
+
+    // Get all Comments
+    app.get("/api/v1/volunteer", async (req, res) => {
+      try {
+        const volunteer = await volunteerCollection.find({}).toArray();
+        res.json({
+          success: true,
+          data: volunteer,
+        });
+      } catch (error) {
+        console.error("Error fetching volunteers:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching volunteers",
+        });
+      }
     });
 
     // ==============================================================
