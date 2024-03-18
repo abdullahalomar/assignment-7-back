@@ -381,11 +381,12 @@ async function run() {
 
     // Comment Post Operation
     app.post("/api/v1/create-comment", async (req, res) => {
-      const { description } = req.body;
+      const { name, description } = req.body;
       console.log(req.body);
       try {
         // Insert cloth into the cloth collection
         const result = await commentCollection.insertOne({
+          name,
           description,
         });
         console.log(result);
@@ -418,6 +419,80 @@ async function run() {
           message: "Error fetching comments",
         });
       }
+    });
+
+    // Get a single comment
+    app.get("/api/v1/comments/:id", async (req, res) => {
+      const commentId = req.params.id;
+
+      try {
+        const comment = await commentCollection.findOne({
+          _id: new ObjectId(commentId),
+        });
+
+        if (comment) {
+          res.json({
+            success: true,
+            data: comment,
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "Comment not found",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching Comment:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching Comment",
+        });
+      }
+    });
+
+    // Comment Update Operation
+    app.put("/api/v1/comments/:id", async (req, res) => {
+      const commentId = req.params.id;
+      const { description } = req.body;
+
+      try {
+        const filter = { _id: new ObjectId(commentId) };
+        const updateDoc = {
+          description,
+        };
+
+        const result = await commentCollection.replaceOne(filter, updateDoc, {
+          new: true,
+        });
+
+        if (result.modifiedCount === 1) {
+          res.json({
+            success: true,
+            message: "Comment updated successfully",
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "Comment not found",
+          });
+        }
+      } catch (error) {
+        console.error("Error updating Comment:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error updating Comment",
+        });
+      }
+    });
+
+    // Delete Comment
+    app.delete("/api/v1/comments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await commentCollection.deleteOne(query, {
+        new: true,
+      });
+      res.send(result);
     });
 
     // ==============================================================
