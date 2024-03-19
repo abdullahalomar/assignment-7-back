@@ -82,53 +82,8 @@ async function run() {
         success: true,
         message: "Login successful",
         token,
+        user,
       });
-    });
-
-    // Get all users
-    app.get("/api/v1/users", async (req, res) => {
-      try {
-        const users = await collection.find({}).toArray();
-        res.json({
-          success: true,
-          data: users,
-        });
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        res.status(500).json({
-          success: false,
-          message: "Error fetching users",
-        });
-      }
-    });
-
-    // Get a single user by ID
-    app.get("/api/v1/users/:id", async (req, res) => {
-      const userId = req.params.id;
-
-      try {
-        const user = await collection.findOne({
-          _id: new ObjectId(userId),
-        });
-
-        if (user) {
-          res.json({
-            success: true,
-            data: user,
-          });
-        } else {
-          res.status(404).json({
-            success: false,
-            message: "User not found",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        res.status(500).json({
-          success: false,
-          message: "Error fetching user",
-        });
-      }
     });
 
     // ==============================================================
