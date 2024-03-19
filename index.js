@@ -538,6 +538,16 @@ async function run() {
       }
     });
 
+    // Delete Comment
+    app.delete("/api/v1/volunteer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await volunteerCollection.deleteOne(query, {
+        new: true,
+      });
+      res.send(result);
+    });
+
     // ==============================================================
 
     // Start the server
