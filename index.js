@@ -30,7 +30,8 @@ async function run() {
     const clothCollection = db.collection("cloths");
     const testimonialCollection = db.collection("testimonials");
     const commentCollection = db.collection("comments");
-    const volunteerCollection = db.collection("volunteer");
+    const volunteerCollection = db.collection("volunteers");
+    const DonateCollection = db.collection("donates");
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
@@ -84,6 +85,52 @@ async function run() {
         token,
         user,
       });
+    });
+
+    // Get all users
+    app.get("/api/v1/users", async (req, res) => {
+      try {
+        const users = await collection.find({}).toArray();
+        res.json({
+          success: true,
+          data: users,
+        });
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching users",
+        });
+      }
+    });
+
+    // Get a single user by ID
+    app.get("/api/v1/users/:id", async (req, res) => {
+      const userId = req.params.id;
+
+      try {
+        const user = await collection.findOne({
+          _id: new ObjectId(userId),
+        });
+
+        if (user) {
+          res.json({
+            success: true,
+            data: user,
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "User not found",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching user",
+        });
+      }
     });
 
     // ==============================================================
@@ -476,7 +523,7 @@ async function run() {
       }
     });
 
-    // Get all Comments
+    // Get all volunteers
     app.get("/api/v1/volunteer", async (req, res) => {
       try {
         const volunteer = await volunteerCollection.find({}).toArray();
@@ -493,7 +540,7 @@ async function run() {
       }
     });
 
-    // Delete Comment
+    // Delete volunteer
     app.delete("/api/v1/volunteer/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -501,6 +548,61 @@ async function run() {
         new: true,
       });
       res.send(result);
+    });
+
+    // Add a new donates
+    app.post("/api/v1/create-donate", async (req, res) => {
+      const {
+        title,
+        description,
+        category,
+        size,
+        userName,
+        userEmail,
+        amount,
+      } = req.body;
+
+      try {
+        // Insert cloth data into the donates collection
+        const result = await DonateCollection.insertOne({
+          title,
+          description,
+          category,
+          size,
+          userName,
+          userEmail,
+          amount,
+        });
+        console.log(result);
+
+        res.status(201).json({
+          success: true,
+          message: "Cloth data posted to donates collection successfully",
+        });
+      } catch (error) {
+        console.error("Error posting cloth data to donates collection:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error posting cloth data to donates collection",
+        });
+      }
+    });
+
+    // Get all donations
+    app.get("/api/v1/donate", async (req, res) => {
+      try {
+        const donations = await DonateCollection.find({}).toArray();
+        res.json({
+          success: true,
+          data: donations,
+        });
+      } catch (error) {
+        console.error("Error fetching donations:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error fetching donations",
+        });
+      }
     });
 
     // ==============================================================
